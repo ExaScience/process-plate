@@ -1,0 +1,757 @@
+CellProfiler Pipeline: http://www.cellprofiler.org
+Version:3
+DateRevision:20141021164117
+GitHash:00c0426
+ModuleCount:35
+HasImagePlaneDetails:False
+
+LoadData:[module_num:1|svn_version:\'Unknown\'|variable_revision_number:6|show_window:True|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Input data file location:Default Input Folder\x7C
+    Name of the file:filelist_illum.csv
+    Load images based on this data?:Yes
+    Base image location:None\x7C
+    Process just a range of rows?:No
+    Rows to process:1,100000
+    Group images by metadata?:Yes
+    Select metadata tags for grouping:Barcode
+    Rescale intensities?:Yes
+
+MeasureImageQuality:[module_num:2|svn_version:\'Unknown\'|variable_revision_number:5|show_window:False|notes:\x5B\'This module is needed to collect the 2-class and 3-class thresholds needed for the next step.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Calculate metrics for which images?:Select...
+    Image count:2
+    Scale count:1
+    Threshold count:2
+    Scale count:1
+    Threshold count:1
+    Select the images to measure:OrigHoechst
+    Include the image rescaling value?:No
+    Calculate blur metrics?:No
+    Spatial scale for blur measurements:20
+    Calculate saturation metrics?:No
+    Calculate intensity metrics?:No
+    Calculate thresholds?:Yes
+    Use all thresholding methods?:No
+    Select a thresholding method:Otsu
+    Typical fraction of the image covered by objects:0.1
+    Two-class or three-class thresholding?:Two classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Background
+    Select a thresholding method:Otsu
+    Typical fraction of the image covered by objects:0.1
+    Two-class or three-class thresholding?:Three classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Background
+    Select the images to measure:OrigCellMask
+    Include the image rescaling value?:No
+    Calculate blur metrics?:No
+    Spatial scale for blur measurements:20
+    Calculate saturation metrics?:No
+    Calculate intensity metrics?:No
+    Calculate thresholds?:Yes
+    Use all thresholding methods?:No
+    Select a thresholding method:Otsu
+    Typical fraction of the image covered by objects:0.1
+    Two-class or three-class thresholding?:Three classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+
+CalculateMath:[module_num:3|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B\'An attempt to set a debris threshold by taking the sum of the Otsu 2-class and 3-class w/background thresholds. The idea is to dial up the threshold to a point where the detected objects are more likely to be separated since the brigher portions will be found. Using the 3-class w/background is an added boost since it is biased towards higher values in the presence of bright debris.This value will be used later.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output measurement:BrightThreshold
+    Operation:Add
+    Select the first operand measurement type:Image
+    Select the first operand objects:None
+    Select the first operand measurement:ImageQuality_ThresholdOtsu_OrigHoechst_2W
+    Multiply the above operand by:1
+    Raise the power of above operand by:1
+    Select the second operand measurement type:Image
+    Select the second operand objects:None
+    Select the second operand measurement:ImageQuality_ThresholdOtsu_OrigHoechst_3BW
+    Multiply the above operand by:1
+    Raise the power of above operand by:1
+    Take log10 of result?:No
+    Multiply the result by:1
+    Raise the power of result by:1
+    Add to the result:0
+    Constrain the result to a lower bound?:No
+    Enter the lower bound:0
+    Constrain the result to an upper bound?:No
+    Enter the upper bound:1
+
+IdentifyPrimaryObjects:[module_num:4|svn_version:\'Unknown\'|variable_revision_number:10|show_window:True|notes:\x5B\'Threshold the image using the value just calculated. No declumping is needed since we want to keep the debris as a contiguous objetc. Then set the min size filter to a value larger than most nuclei.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigHoechst
+    Name the primary objects to be identified:BrightROI
+    Typical diameter of objects, in pixel units (Min,Max):40,1000
+    Discard objects outside the diameter range?:Yes
+    Try to merge too small objects with nearby larger objects?:No
+    Discard objects touching the border of the image?:No
+    Method to distinguish clumped objects:None
+    Method to draw dividing lines between clumped objects:Intensity
+    Size of smoothing filter:10
+    Suppress local maxima that are closer than this minimum allowed distance:7
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Name the outline image:DebrisOutlines
+    Fill holes in identified objects?:After both thresholding and declumping
+    Automatically calculate size of smoothing filter for declumping?:Yes
+    Automatically calculate minimum allowed distance between local maxima?:Yes
+    Retain outlines of the identified objects?:No
+    Automatically calculate the threshold using the Otsu method?:Yes
+    Enter Laplacian of Gaussian threshold:0.5
+    Automatically calculate the size of objects for the Laplacian of Gaussian filter?:Yes
+    Enter LoG filter diameter:5
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Threshold setting version:1
+    Threshold strategy:Measurement
+    Thresholding method:MCT
+    Select the smoothing method for thresholding:Automatic
+    Threshold smoothing scale:1
+    Threshold correction factor:1
+    Lower and upper bounds on threshold:0.001,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.0
+    Select the measurement to threshold with:Math_BrightThreshold
+    Select binary image:None
+    Masking objects:From image
+    Two-class or three-class thresholding?:Two classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+FlagImage:[module_num:5|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Hidden:1
+    Hidden:1
+    Name the flag\'s category:Metadata
+    Name the flag:isDebrisOrCellClump
+    Flag if any, or all, measurement(s) fails to meet the criteria?:Flag if any fail
+    Skip image set if flagged?:Yes
+    Flag is based on:Whole-image measurement
+    Select the object to be used for flagging:None
+    Which measurement?:Count_BrightROI
+    Flag images based on low values?:No
+    Minimum value:0.0
+    Flag images based on high values?:Yes
+    Maximum value:0.0
+    Rules file location:Elsewhere...\x7C
+    Rules file name:rules.txt
+    Class number:
+
+IdentifySecondaryObjects:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:9|show_window:False|notes:\x5B"Expand the bright ROI object to capture the large mass in the CellMask channel,if a cell clump. If it\'s debris, this won\'t expand much beyond the primary object. Lower bound on threshold is set based on noise level from empty wells."\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+    Select the input objects:BrightROI
+    Name the objects to be identified:ExpandedBrightROI
+    Select the method to identify the secondary objects:Propagation
+    Select the input image:OrigCellMask
+    Number of pixels by which to expand the primary objects:10
+    Regularization factor:0.05
+    Name the outline image:BrightROIOutlines
+    Retain outlines of the identified secondary objects?:Yes
+    Discard secondary objects touching the border of the image?:No
+    Discard the associated primary objects?:No
+    Name the new primary objects:FilteredNuclei
+    Retain outlines of the new primary objects?:No
+    Name the new primary object outlines:FilteredNucleiOutlines
+    Fill holes in identified objects?:Yes
+    Threshold setting version:1
+    Threshold strategy:Global
+    Thresholding method:Otsu
+    Select the smoothing method for thresholding:No smoothing
+    Threshold smoothing scale:1.0
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.002,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.0
+    Select the measurement to threshold with:None
+    Select binary image:None
+    Masking objects:None
+    Two-class or three-class thresholding?:Three classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Background
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+MaskImage:[module_num:7|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Mask the Hoechst image with the expanded bright regions.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigHoechst
+    Name the output image:MaskedHoechst
+    Use objects or an image as a mask?:Objects
+    Select object for mask:ExpandedBrightROI
+    Select image for mask:None
+    Invert the mask?:Yes
+
+IdentifyPrimaryObjects:[module_num:8|svn_version:\'Unknown\'|variable_revision_number:10|show_window:True|notes:\x5B\'Identify nuclei from the masked Hoechst image. Lower bound on threshold is set based on noise level from empty wells.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:MaskedHoechst
+    Name the primary objects to be identified:UnsegmentedNuclei
+    Typical diameter of objects, in pixel units (Min,Max):10,100
+    Discard objects outside the diameter range?:Yes
+    Try to merge too small objects with nearby larger objects?:No
+    Discard objects touching the border of the image?:Yes
+    Method to distinguish clumped objects:None
+    Method to draw dividing lines between clumped objects:Intensity
+    Size of smoothing filter:10
+    Suppress local maxima that are closer than this minimum allowed distance:7.0
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Name the outline image:PrimaryOutlines
+    Fill holes in identified objects?:After both thresholding and declumping
+    Automatically calculate size of smoothing filter for declumping?:Yes
+    Automatically calculate minimum allowed distance between local maxima?:Yes
+    Retain outlines of the identified objects?:No
+    Automatically calculate the threshold using the Otsu method?:Yes
+    Enter Laplacian of Gaussian threshold:0.5
+    Automatically calculate the size of objects for the Laplacian of Gaussian filter?:Yes
+    Enter LoG filter diameter:5.0
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Threshold setting version:1
+    Threshold strategy:Global
+    Thresholding method:Otsu
+    Select the smoothing method for thresholding:Automatic
+    Threshold smoothing scale:1.0
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.001,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.0
+    Select the measurement to threshold with:None
+    Select binary image:None
+    Masking objects:None
+    Two-class or three-class thresholding?:Three classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Background
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+ConvertObjectsToImage:[module_num:9|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Convert nuclei to a binary image of the foreground.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input objects:UnsegmentedNuclei
+    Name the output image:Foreground
+    Select the color format:Binary (black & white)
+    Select the colormap:Default
+
+Morph:[module_num:10|svn_version:\'Unknown\'|variable_revision_number:4|show_window:True|notes:\x5B\'Invert the pixel intensities of the foreground image, and take the distance transform (DT). This new image labels each pixel of the image with the distance to the nearest nucleus. The idea is that scratches/well edges will appear as contiguous regions of unusually large distances.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:Foreground
+    Name the output image:DistanceTransform
+    Select the operation to perform:invert
+    Number of times to repeat operation:Once
+    Repetition number:2
+    Scale:3.0
+    Structuring element:Disk
+    X offset:1.0
+    Y offset:1.0
+    Angle:0.0
+    Width:3.0
+    Height:3.0
+    Custom:5,5,1111111111111111111111111
+    Rescale values from 0 to 1?:Yes
+    Select the operation to perform:distance
+    Number of times to repeat operation:Once
+    Repetition number:2
+    Scale:3.0
+    Structuring element:Disk
+    X offset:1.0
+    Y offset:1.0
+    Angle:0.0
+    Width:3.0
+    Height:3.0
+    Custom:5,5,1111111111111111111111111
+    Rescale values from 0 to 1?:No
+
+MaskImage:[module_num:11|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Mask the DT so that the 0-labeled nuclei will not be considered in measurements from this image.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:DistanceTransform
+    Name the output image:MaskedDistanceTransform
+    Use objects or an image as a mask?:Objects
+    Select object for mask:UnsegmentedNuclei
+    Select image for mask:None
+    Invert the mask?:Yes
+
+MeasureImageIntensity:[module_num:12|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B\'Measure the intensity (i.e, distance) statistics from the DT image.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the image to measure:MaskedDistanceTransform
+    Measure the intensity only from areas enclosed by objects?:No
+    Select the input objects:None
+
+CalculateMath:[module_num:13|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B"What is an unsually large distance to indicate a scratch/well edge? I\'ve chosen to mark outliers based on the upper fence of the DT distribution. First, calculate the interquartile range (IQR)"\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output measurement:DistanceTransformIQR
+    Operation:Subtract
+    Select the minuend measurement type:Image
+    Select the minuend objects:None
+    Select the minuend measurement:Intensity_UpperQuartileIntensity_MaskedDistanceTransform
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Select the subtrahend measurement type:Image
+    Select the subtrahend objects:None
+    Select the subtrahend measurement:Intensity_LowerQuartileIntensity_MaskedDistanceTransform
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Take log10 of result?:No
+    Multiply the result by:1.0
+    Raise the power of result by:1.0
+    Add to the result:0.0
+    Constrain the result to a lower bound?:No
+    Enter the lower bound:0.0
+    Constrain the result to an upper bound?:No
+    Enter the upper bound:1.0
+
+CalculateMath:[module_num:14|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B"The upper inner fence is officially Q3 + 1.5*IQR. I\'ve chosen 0.75*IQR since it produces better results."\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output measurement:UpperInnerFence
+    Operation:Add
+    Select the first operand measurement type:Image
+    Select the first operand objects:None
+    Select the first operand measurement:Intensity_UpperQuartileIntensity_MaskedDistanceTransform
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Select the second operand measurement type:Image
+    Select the second operand objects:None
+    Select the second operand measurement:Math_DistanceTransformIQR
+    Multiply the above operand by:0.75
+    Raise the power of above operand by:1.0
+    Take log10 of result?:No
+    Multiply the result by:1.0
+    Raise the power of result by:1.0
+    Add to the result:0.0
+    Constrain the result to a lower bound?:No
+    Enter the lower bound:0.0
+    Constrain the result to an upper bound?:No
+    Enter the upper bound:1.0
+
+ImageMath:[module_num:15|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'In CellProfiler, any thresholding is performed only on the \x5B0,1\x5D range, so I need to workaround it in order to threshold the DT. First, subtract the DT cutoff from the DT pixel values, so that the cutoff distance is set to 0.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Operation:Subtract
+    Raise the power of the result by:1.0
+    Multiply the result by:1.0
+    Add to result:0.0
+    Set values less than 0 equal to 0?:No
+    Set values greater than 1 equal to 1?:Yes
+    Ignore the image masks?:No
+    Name the output image:DistanceCutoff
+    Image or measurement?:Image
+    Select the first image:DistanceTransform
+    Multiply the first image by:1.0
+    Measurement:
+    Image or measurement?:Measurement
+    Select the second image:
+    Multiply the second image by:1.0
+    Measurement:Math_UpperInnerFence
+
+ApplyThreshold:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:7|show_window:False|notes:\x5B\'From the cutoff image, threshold manually with a value of 0. Regions above 0 are candidates for scratches or well edges.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:DistanceCutoff
+    Name the output image:BinaryDistanceCutoff
+    Select the output image type:Binary (black and white)
+    Set pixels below or above the threshold to zero?:Below threshold
+    Subtract the threshold value from the remaining pixel intensities?:No
+    Number of pixels by which to expand the thresholding around those excluded bright pixels:0.0
+    Threshold setting version:1
+    Threshold strategy:Manual
+    Thresholding method:Otsu
+    Select the smoothing method for thresholding:No smoothing
+    Threshold smoothing scale:1.0
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.0
+    Select the measurement to threshold with:None
+    Select binary image:None
+    Masking objects:None
+    Two-class or three-class thresholding?:Two classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+Morph:[module_num:17|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B"Skeletonize the binary cutoff image. Using \'skelPE\' has a few less spurs than the \'skel\' operation alone, but a few still remain. Spur the line segments to reduce them. I\'ve chosen 25 as the repetition number since that seems to be the average half-distance between nuclei."\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:BinaryDistanceCutoff
+    Name the output image:DistanceTransformSkeleton
+    Select the operation to perform:skelpe
+    Number of times to repeat operation:Once
+    Repetition number:2
+    Scale:100
+    Structuring element:Disk
+    X offset:1.0
+    Y offset:1.0
+    Angle:0.0
+    Width:3.0
+    Height:3.0
+    Custom:5,5,1111111111111111111111111
+    Rescale values from 0 to 1?:Yes
+    Select the operation to perform:spur
+    Number of times to repeat operation:Custom
+    Repetition number:25
+    Scale:3.0
+    Structuring element:Disk
+    X offset:1.0
+    Y offset:1.0
+    Angle:0.0
+    Width:3.0
+    Height:3.0
+    Custom:5,5,1111111111111111111111111
+    Rescale values from 0 to 1?:Yes
+
+IdentifyPrimaryObjects:[module_num:18|svn_version:\'Unknown\'|variable_revision_number:10|show_window:False|notes:\x5B\'Identify all skeletons from the binary image as objects.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:DistanceTransformSkeleton
+    Name the primary objects to be identified:AllSkeletons
+    Typical diameter of objects, in pixel units (Min,Max):10,40
+    Discard objects outside the diameter range?:No
+    Try to merge too small objects with nearby larger objects?:No
+    Discard objects touching the border of the image?:No
+    Method to distinguish clumped objects:None
+    Method to draw dividing lines between clumped objects:Intensity
+    Size of smoothing filter:10
+    Suppress local maxima that are closer than this minimum allowed distance:7.0
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Name the outline image:AllSkeletonOutlines
+    Fill holes in identified objects?:Never
+    Automatically calculate size of smoothing filter for declumping?:Yes
+    Automatically calculate minimum allowed distance between local maxima?:Yes
+    Retain outlines of the identified objects?:Yes
+    Automatically calculate the threshold using the Otsu method?:Yes
+    Enter Laplacian of Gaussian threshold:0.5
+    Automatically calculate the size of objects for the Laplacian of Gaussian filter?:Yes
+    Enter LoG filter diameter:5.0
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Threshold setting version:1
+    Threshold strategy:Manual
+    Thresholding method:Otsu
+    Select the smoothing method for thresholding:Automatic
+    Threshold smoothing scale:1.0
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.5
+    Select the measurement to threshold with:None
+    Select binary image:None
+    Masking objects:None
+    Two-class or three-class thresholding?:Two classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+MeasureObjectSizeShape:[module_num:19|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Measure the morphological features of the skeleton objects.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select objects to measure:AllSkeletons
+    Calculate the Zernike features?:No
+
+ImageMath:[module_num:20|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B"Since I need to define the scratch region for exclusion, I found that simply using the upper inner fence doesn\'t work well for well edges, especially when they are large. Since I set the distance cutoff to 25 pixels for any region defined as a scratch."\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Operation:None
+    Raise the power of the result by:1.0
+    Multiply the result by:1.0
+    Add to result:-25
+    Set values less than 0 equal to 0?:Yes
+    Set values greater than 1 equal to 1?:Yes
+    Ignore the image masks?:No
+    Name the output image:DistanceManualCutoff
+    Image or measurement?:Image
+    Select the first image:DistanceTransform
+    Multiply the first image by:1.0
+    Measurement:
+    Image or measurement?:Image
+    Select the second image:
+    Multiply the second image by:1.0
+    Measurement:
+
+IdentifySecondaryObjects:[module_num:21|svn_version:\'Unknown\'|variable_revision_number:9|show_window:False|notes:\x5B\'Define the scratch/well edge region as an object based on the skeletons.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input objects:AllSkeletons
+    Name the objects to be identified:AllScratches
+    Select the method to identify the secondary objects:Propagation
+    Select the input image:DistanceManualCutoff
+    Number of pixels by which to expand the primary objects:10
+    Regularization factor:0.05
+    Name the outline image:ScratchOutlines
+    Retain outlines of the identified secondary objects?:No
+    Discard secondary objects touching the border of the image?:No
+    Discard the associated primary objects?:No
+    Name the new primary objects:FilteredNuclei
+    Retain outlines of the new primary objects?:No
+    Name the new primary object outlines:FilteredNucleiOutlines
+    Fill holes in identified objects?:No
+    Threshold setting version:1
+    Threshold strategy:Manual
+    Thresholding method:Otsu
+    Select the smoothing method for thresholding:No smoothing
+    Threshold smoothing scale:1.0
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Approximate fraction of image covered by objects?:0.01
+    Manual threshold:0.5
+    Select the measurement to threshold with:None
+    Select binary image:None
+    Masking objects:None
+    Two-class or three-class thresholding?:Two classes
+    Minimize the weighted variance or the entropy?:Weighted variance
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Method to calculate adaptive window size:Image size
+    Size of adaptive window:10
+
+FilterObjects:[module_num:22|svn_version:\'Unknown\'|variable_revision_number:7|show_window:True|notes:\x5B\'Filter the skeletons based on the two measurements and cutoffs which I determined using CellProfiler Analyst. The scratch region assocaited with any filtered skeletons are also retained.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output objects:FilteredSkeletons
+    Select the object to filter:AllSkeletons
+    Select the filtering mode:Measurements
+    Select the filtering method:Limits
+    Select the objects that contain the filtered objects:None
+    Retain outlines of the identified objects?:No
+    Name the outline image:FilteredObjects
+    Rules file location:Elsewhere...\x7C
+    Rules file name:rules.txt
+    Class number:1
+    Measurement count:2
+    Additional object count:1
+    Assign overlapping child to:Both parents
+    Select the measurement to filter by:AreaShape_Compactness
+    Filter using a minimum measurement value?:Yes
+    Minimum value:220
+    Filter using a maximum measurement value?:No
+    Maximum value:1.0
+    Select the measurement to filter by:AreaShape_MaxFeretDiameter
+    Filter using a minimum measurement value?:Yes
+    Minimum value:710
+    Filter using a maximum measurement value?:No
+    Maximum value:0.3
+    Select additional object to relabel:AllScratches
+    Name the relabeled objects:Scratches
+    Retain outlines of relabeled objects?:Yes
+    Name the outline image:ScratchOutlines
+
+FlagImage:[module_num:23|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Flag the image if there are any skeletons that survived the filtering.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Hidden:1
+    Hidden:1
+    Name the flag\'s category:Metadata
+    Name the flag:isScratchOrWell
+    Flag if any, or all, measurement(s) fails to meet the criteria?:Flag if any fail
+    Skip image set if flagged?:Yes
+    Flag is based on:Whole-image measurement
+    Select the object to be used for flagging:None
+    Which measurement?:Count_FilteredSkeletons
+    Flag images based on low values?:No
+    Minimum value:1
+    Flag images based on high values?:Yes
+    Maximum value:0
+    Rules file location:Elsewhere...\x7C
+    Rules file name:rules.txt
+    Class number:
+
+MaskImage:[module_num:24|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Mask the Hoechst image with the nuclei objects to create a foreground image.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigHoechst
+    Name the output image:ForegroundHoechst
+    Use objects or an image as a mask?:Objects
+    Select object for mask:UnsegmentedNuclei
+    Select image for mask:None
+    Invert the mask?:No
+
+MaskImage:[module_num:25|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Mask the Hoechst image with the inverted nuclei objects to create a background image.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigHoechst
+    Name the output image:BackgroundHoechst
+    Use objects or an image as a mask?:Objects
+    Select object for mask:UnsegmentedNuclei
+    Select image for mask:None
+    Invert the mask?:Yes
+
+MeasureImageIntensity:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B\'Measure the intensity statistics from the foreground and background images.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+    Select the image to measure:ForegroundHoechst
+    Measure the intensity only from areas enclosed by objects?:No
+    Select the input objects:Nuclei
+    Select the image to measure:BackgroundHoechst
+    Measure the intensity only from areas enclosed by objects?:No
+    Select the input objects:None
+
+CalculateMath:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B\'Now we calculate the image signal-to-nose ratio (SNR). Rather than using the standard (mean foreground)/(variance background), I use the more-robust median/IQR. First, calculate the IQR of the background pixels.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output measurement:BackgroundHoechstIQR
+    Operation:Subtract
+    Select the minuend measurement type:Image
+    Select the minuend objects:None
+    Select the minuend measurement:Intensity_UpperQuartileIntensity_BackgroundHoechst
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Select the subtrahend measurement type:Image
+    Select the subtrahend objects:None
+    Select the subtrahend measurement:Intensity_LowerQuartileIntensity_BackgroundHoechst
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Take log10 of result?:No
+    Multiply the result by:1.0
+    Raise the power of result by:1.0
+    Add to the result:0.0
+    Constrain the result to a lower bound?:No
+    Enter the lower bound:0.0
+    Constrain the result to an upper bound?:No
+    Enter the upper bound:1.0
+
+CalculateMath:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:2|show_window:False|notes:\x5B\'Calculate the SNR of the Hoechst image as the (median foreground)/(IQR background)\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Name the output measurement:RobustHoechstSNR
+    Operation:Divide
+    Select the numerator measurement type:Image
+    Select the numerator objects:None
+    Select the numerator measurement:Intensity_MedianIntensity_ForegroundHoechst
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Select the denominator measurement type:Image
+    Select the denominator objects:None
+    Select the denominator measurement:Math_BackgroundHoechstIQR
+    Multiply the above operand by:1.0
+    Raise the power of above operand by:1.0
+    Take log10 of result?:No
+    Multiply the result by:1.0
+    Raise the power of result by:1.0
+    Add to the result:0.0
+    Constrain the result to a lower bound?:No
+    Enter the lower bound:0.0
+    Constrain the result to an upper bound?:No
+    Enter the upper bound:1.0
+
+FlagImage:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B"Based on the SNR distribution, I\'ve set the cutoff as 30."\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Hidden:1
+    Hidden:1
+    Name the flag\'s category:Metadata
+    Name the flag:isLowIntensity
+    Flag if any, or all, measurement(s) fails to meet the criteria?:Flag if any fail
+    Skip image set if flagged?:Yes
+    Flag is based on:Whole-image measurement
+    Select the object to be used for flagging:None
+    Which measurement?:Math_RobustHoechstSNR
+    Flag images based on low values?:Yes
+    Minimum value:30
+    Flag images based on high values?:No
+    Maximum value:1.0
+    Rules file location:Elsewhere...\x7C
+    Rules file name:rules.txt
+    Class number:
+
+CorrectIlluminationCalculate:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:2|show_window:True|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigHoechst
+    Name the output image:IllumHoechst
+    Select how the illumination function is calculated:Regular
+    Dilate objects in the final averaged image?:No
+    Dilation radius:1
+    Block size:60
+    Rescale the illumination function?:Yes
+    Calculate function for each image individually, or based on all images?:All\x3A Across cycles
+    Smoothing method:Median Filter
+    Method to calculate smoothing filter size:Manually
+    Approximate object size:10
+    Smoothing filter size:300
+    Retain the averaged image?:No
+    Name the averaged image:IllumBlueAvg
+    Retain the dilated image?:No
+    Name the dilated image:IllumBlueDilated
+    Automatically calculate spline parameters?:Yes
+    Background mode:auto
+    Number of spline points:5
+    Background threshold:2
+    Image resampling factor:2
+    Maximum number of iterations:40
+    Residual value for convergence:0.001
+
+CorrectIlluminationCalculate:[module_num:31|svn_version:\'Unknown\'|variable_revision_number:2|show_window:True|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigAlexa568
+    Name the output image:IllumAlexa568
+    Select how the illumination function is calculated:Regular
+    Dilate objects in the final averaged image?:No
+    Dilation radius:1
+    Block size:60
+    Rescale the illumination function?:Yes
+    Calculate function for each image individually, or based on all images?:All\x3A Across cycles
+    Smoothing method:Median Filter
+    Method to calculate smoothing filter size:Manually
+    Approximate object size:10
+    Smoothing filter size:300
+    Retain the averaged image?:No
+    Name the averaged image:IllumBlueAvg
+    Retain the dilated image?:No
+    Name the dilated image:IllumBlueDilated
+    Automatically calculate spline parameters?:Yes
+    Background mode:auto
+    Number of spline points:5
+    Background threshold:2
+    Image resampling factor:2
+    Maximum number of iterations:40
+    Residual value for convergence:0.001
+
+CorrectIlluminationCalculate:[module_num:32|svn_version:\'Unknown\'|variable_revision_number:2|show_window:True|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:OrigCellMask
+    Name the output image:IllumCellMask
+    Select how the illumination function is calculated:Regular
+    Dilate objects in the final averaged image?:No
+    Dilation radius:1
+    Block size:60
+    Rescale the illumination function?:Yes
+    Calculate function for each image individually, or based on all images?:All\x3A Across cycles
+    Smoothing method:Median Filter
+    Method to calculate smoothing filter size:Manually
+    Approximate object size:10
+    Smoothing filter size:300
+    Retain the averaged image?:No
+    Name the averaged image:IllumBlueAvg
+    Retain the dilated image?:No
+    Name the dilated image:IllumBlueDilated
+    Automatically calculate spline parameters?:Yes
+    Background mode:auto
+    Number of spline points:5
+    Background threshold:2
+    Image resampling factor:2
+    Maximum number of iterations:40
+    Residual value for convergence:0.001
+
+SaveImages:[module_num:33|svn_version:\'Unknown\'|variable_revision_number:11|show_window:True|notes:\x5B\'Save the illumination correction function for the Hoechst channel. Note that the file in not saved until the last cycle, and is named bythe plate barcode.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:IllumHoechst
+    Select the objects to save:None
+    Select the module display window to save:None
+    Select method for constructing file names:Single name
+    Select image name for file prefix:None
+    Enter single file name:\\\\g<Barcode>_IllumHoechst
+    Number of digits:4
+    Append a suffix to the image file name?:No
+    Text to append to the image name:
+    Saved file format:mat
+    Output file location:Default Output Folder\x7CIllumCorrFxns
+    Image bit depth:8
+    Overwrite existing files without warning?:Yes
+    When to save:Last cycle
+    Rescale the images? :No
+    Save as grayscale or color image?:Grayscale
+    Select colormap:gray
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Default Input Folder
+    Saved movie format:avi
+
+SaveImages:[module_num:34|svn_version:\'Unknown\'|variable_revision_number:11|show_window:True|notes:\x5B\'Save the illumination correction function for the Alexa568 channel. Note that the file in not saved until the last cycle, and is named bythe plate barcode.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:IllumAlexa568
+    Select the objects to save:None
+    Select the module display window to save:None
+    Select method for constructing file names:Single name
+    Select image name for file prefix:None
+    Enter single file name:\\\\g<Barcode>_IllumAlexa568
+    Number of digits:4
+    Append a suffix to the image file name?:No
+    Text to append to the image name:
+    Saved file format:mat
+    Output file location:Default Output Folder\x7CIllumCorrFxns
+    Image bit depth:8
+    Overwrite existing files without warning?:Yes
+    When to save:Last cycle
+    Rescale the images? :No
+    Save as grayscale or color image?:Grayscale
+    Select colormap:gray
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Default Input Folder
+    Saved movie format:avi
+
+SaveImages:[module_num:35|svn_version:\'Unknown\'|variable_revision_number:11|show_window:True|notes:\x5B\'Save the illumination correction function for the CellMask channel. Note that the file in not saved until the last cycle, and is named bythe plate barcode.\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:IllumCellMask
+    Select the objects to save:None
+    Select the module display window to save:None
+    Select method for constructing file names:Single name
+    Select image name for file prefix:None
+    Enter single file name:\\\\g<Barcode>_IllumCellMask
+    Number of digits:4
+    Append a suffix to the image file name?:No
+    Text to append to the image name:
+    Saved file format:mat
+    Output file location:Default Output Folder\x7CIllumCorrFxns
+    Image bit depth:8
+    Overwrite existing files without warning?:Yes
+    When to save:Last cycle
+    Rescale the images? :No
+    Save as grayscale or color image?:Grayscale
+    Select colormap:gray
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Default Input Folder
+    Saved movie format:avi
