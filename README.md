@@ -18,10 +18,12 @@ to P24) and particular naming scheme.
 
 To use: place the files at the root of your CellProfiler directory and 
 call:
+```
 	./Processplate.sh <platedir> <outdir>
-Where
-* <platedir> holds the image files. The name is supposed to give the
+```
+where
+* `<platedir>` holds the image files. The name is supposed to give the
 plate's barcode.
-* <outdir> is where the results will be saved.
+* `<outdir>` is where the results will be saved.
 
 CellProfiler: [http://cellprofiler.org](http://cellprofiler.org)
