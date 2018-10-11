@@ -27,3 +27,18 @@ plate's barcode.
 * `<outdir>` is where the results will be saved.
 
 CellProfiler: [http://cellprofiler.org](http://cellprofiler.org)
+Note that we have used CellProfiler version 2.1.1. This can be installed trough Github but you need to fix a problem of the dependent files having been removed from the CellProfiler website.
+To solve this we added a folder with the removed dependencies that you can use to fix the CellProfiler after checkout, for example as follows:
+```
+    git clone https://github.com/CellProfiler/CellProfiler.git
+    git -C ./CellProfiler checkout -b 2.1.1 tags/2.1.1
+    mkdir ./CellProfiler/dependencies
+    cp CPdependencies/*.jar ./CellProfiler/dependencies
+    cp CPdependencies/external_dependencies.py ./CellProfiler
+```
+CellProfiler by default runs Maven to install or update dependencies. Our scripts skip these updates (for reproducabiity and to save time) but it has to be run at least once to get everything going initially.
+Therefore you need to run the following command at least once:
+```
+    python CellProfiler/CellProfiler.py --build-and-exit
+```
+
